@@ -1,10 +1,8 @@
 import os
 import json
-from regex import B
 import requests
 import base64
 import io
-import time
 from PIL import Image
 from dotenv import load_dotenv
 
