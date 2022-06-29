@@ -24,7 +24,6 @@ class FileConverter:
         self.file_name = ''
         self.file_extension = ''
         self.file_url = ''
-        self.file_data = ''
 
     #file_id setter
     def set_file_attributes(self, file_id, file_name, file_extension, file_url):
@@ -35,8 +34,7 @@ class FileConverter:
 
     #upload file
     def upload_file(self):
-        #get file data
-        #request config
+        #get file data in binaray and post request
         with open(f"{self.convert_path}", "rb") as file:
             b = file.read()
         b = b
@@ -50,7 +48,6 @@ class FileConverter:
         payload = ''
         url = f"https://v2.convertapi.com/upload?Secret={self.API_SECRET}&FileName={self.convert_path}"
 
-        #make request
         session = requests.Session()
         response = session.request('POST', url, data=payload, files=post_files, headers=headers)
         response = json.loads(response.text)
@@ -92,6 +89,7 @@ class FileConverter:
     def recieve_file(self, file_data):
         path = rf'C:\Users\zcool\Desktop\imgs\{self.new_name}.{self.after_convert}'
 
+        #creates the file placeholder
         with open(path, 'wb') as file:
             data = file_data
             data = base64.b64decode(data)
@@ -99,6 +97,7 @@ class FileConverter:
             file.write(data)
         file.close()
 
+        #writes file data top the placeholder
         with open(path, 'rb') as file:
             b = file.read()
             b = base64.b64decode(b)
