@@ -38,7 +38,6 @@ class FileConverter:
         with open(f"{self.convert_path}", "rb") as file:
             b = file.read()
         b = b
-
         post_files = {
             "filename": b,
             }
@@ -47,7 +46,6 @@ class FileConverter:
         }
         payload = ''
         url = f"https://v2.convertapi.com/upload?Secret={self.API_SECRET}&FileName={self.convert_path}"
-
         session = requests.Session()
         response = session.request('POST', url, data=payload, files=post_files, headers=headers)
         response = json.loads(response.text)
@@ -66,7 +64,6 @@ class FileConverter:
         }
         payload = ''
         url = f'https://v2.convertapi.com/convert/{self.before_convert}/to/{self.after_convert}?Secret={self.API_SECRET}&File={self.file_id}'
-
         session = requests.Session()
         response = session.request('GET', url, data=payload, headers=headers)
         data = json.loads(response.text)
@@ -115,6 +112,6 @@ class FileConverter:
             'Lifetime': '315569520',
             'Count': '1'
         }
-
         response = requests.post('https://v2.convertapi.com/token/create?', params=params)
+        
         print(response.content)
