@@ -101,9 +101,18 @@ class FileConverter:
         with open(path, 'rb') as file:
             b = file.read()
             b = base64.b64decode(b)
-            img = Image.open(io.BytesIO(b))
-            img.show()
-            img.save(path)
+            #if file is image
+            try:
+                img = Image.open(io.BytesIO(b))
+                img.show()
+                img.save(path)
+            #if file is document
+            except:
+                file.close()
+                with open(path, 'wb') as file:
+                    file.write(b)
+                    file.close()
+                    os.startfile(path)
         file.close()
 
 
