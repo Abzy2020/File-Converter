@@ -1,7 +1,7 @@
 import sys
 import re
 from file_converter import FileConverter
-from PyQt6.QtWidgets import QApplication, QPushButton, QLabel, QVBoxLayout, QFileDialog, QWidget, QComboBox, QPlainTextEdit
+from PyQt6.QtWidgets import QApplication, QPushButton, QLabel, QVBoxLayout, QFileDialog, QWidget, QComboBox, QPlainTextEdit, QLineEdit
 
 
 class MyApp(QWidget):
@@ -10,22 +10,33 @@ class MyApp(QWidget):
 
         self.filepath = 'path: '
         self.dirstring = 'conversion path: '
+        self.before_convert = ''
 
         #Widgets
         self.search_button = QPushButton('search file')
         self.dir_button = QPushButton('select directory')
         self.convert_button = QPushButton('convert')
-
+            #dropdown box
         self.dropdown = QComboBox(self)
-        self.options = ['png', 'jpg', 'gif', 'pdf', 'docx']
-        self.dropdown.addItems(self.options)
+        self.gif_to_other = ['png', 'jpg', 'gif', 'pdf', 'pdfa', 'svg', 'tiff', 'webp']
+        self.jpg_to_other = ['compress', 'gif', 'jpg', 'pdf', 'pdfa', 'png', 'svg', 'tiff', 'watermark', 'webp']
+        self.png_to_other = ['gif', 'jpg', 'pdf', 'pdfa', 'png', 'svg', 'tiff', 'watermark', 'webp']
+        self.svg_to_other = ['jpg', 'pdf', 'pdfa', 'png', 'svg', 'tiff', 'webp']
+        self.csv_to_other = ['jpg', 'pdf', 'pdfa', 'png', 'tiff', 'webp', 'xls', 'xlsx']
+        self.docx_to_other = [
+            'compare', 'doc', 'docx', 'encrypt', 'html', 'jpg', 'mhtml', 'odt', 'pdf', 'png', 
+            'rtf', 'tiff', 'txt', 'webp', 'xml', 'xps'
+        ]
+        self.pdf_to_other = ['csv', 'ocr', 'txt']
+
         self.dropdown.activated.connect(self.select_conversion_handler)
-
-        self.rename = QPlainTextEdit(self)
-
+            #rename file text edit
+        self.rename = QLineEdit(self)
+            #labels
         self.label = QLabel('select desired format', self)
         self.path_label = QLabel(self.filepath, self)
         self.dirpath_label = QLabel(self.dirstring, self)
+        self.rename_label = QLabel('name new file')
 
         #Layouts
         self.my_layout = QVBoxLayout(self)
@@ -35,6 +46,7 @@ class MyApp(QWidget):
         self.my_layout.addWidget(self.dir_button)
         self.my_layout.addWidget(self.label)
         self.my_layout.addWidget(self.dropdown)
+        self.my_layout.addWidget(self.rename_label)
         self.my_layout.addWidget(self.rename)
         self.my_layout.addWidget(self.convert_button)
 
@@ -50,11 +62,27 @@ class MyApp(QWidget):
 
 
     def search_files(self):
+        #select file to be converted
         self.filename = QFileDialog.getOpenFileName()
         self.filepath = self.filename[0]
+        #get the file extension before conversion
         self.before_convert = re.search('[^.]+$', self.filepath).group().lower()
-
         self.path_label.setText(f'path: {self.filepath}')
+        #set conversion options based on selected file
+        if self.before_convert == 'gif':
+            self.dropdown.addItems(self.gif_to_other)
+        elif self.before_convert == 'jpg':
+            self.dropdown.addItems(self.jpg_to_other)
+        elif self.before_convert == 'png':
+            self.dropdown.addItems(self.png_to_other)
+        elif self.before_convert == 'svg':
+            self.dropdown.addItems(self.svg_to_other)
+        elif self.before_convert == 'csv':
+            self.dropdown.addItems(self.csv_to_other)
+        elif self.before_convert == 'docx':
+            self.dropdown.addItems(self.docx_to_other)
+        else:
+            print('please select file')
         print(self.filepath)
 
 
@@ -64,6 +92,7 @@ class MyApp(QWidget):
 
 
     def search_dirs(self):
+        #select directory where converted files will go
         self.dirpath = QFileDialog.getExistingDirectory()
         self.dirpath_label.setText(f'conversion path: {self.dirpath}')
         print(self.dirpath)
@@ -71,16 +100,37 @@ class MyApp(QWidget):
 
     def select_conversion_handler(self, index):
         #selected file will be passed to the conversion func
-        self.selection = self.options[index]
+        if self.before_convert == 'gif':
+            self.selection = self.gif_to_other[index]
+        elif self.before_convert == 'jpg':
+            self.selection = self.jpg_to_other[index]
+        elif self.before_convert == 'png':
+            self.selection = self.png_to_other[index]
+        elif self.before_convert == 'svg':
+            self.selection = self.svg_to_other[index]
+        elif self.before_convert == 'csv':
+            self.selection = self.csv_to_other[index]
+        elif self.before_convert == 'docx':
+            self.selection = self.docx_to_other[index]
+        else:
+            print('please select file')
+
         print(f'Activated index: {self.selection}')
         self.convert_confirmation(self.selection)
 
 
     def convert_confirmation(self, after_convert):
         self.after_convert = after_convert
-        print(f'from: {self.before_convert}')
-        print(f'to: {self.after_convert}')
-        print(f'rename to: {self.rename.toPlainText()}')
+        #if there is a selected file print it out
+        try:
+            print(f'from: {self.before_convert}')
+            print(f'to: {self.after_convert}')
+            print(f'rename to: {self.rename.text()}')
+        #if there isn't a selected file, prompt a selection
+        except AttributeError.with_traceback():
+            print(f'from: please select a file')
+            print(f'to: {self.after_convert}')
+            print(f'rename to: {self.rename.text()}')
 
 
     def make_conversion(self):
@@ -88,7 +138,7 @@ class MyApp(QWidget):
                     before_convert=self.before_convert,
                     after_convert=self.after_convert,
                     convert_path=self.filepath,
-                    new_name=self.rename.toPlainText(),
+                    new_name=self.rename.text(),
                     new_dir=self.dirpath)
         converter.upload_file()
         converter.convert_file()
@@ -96,10 +146,9 @@ class MyApp(QWidget):
 
 if __name__ == '__main__':
     app = QApplication([])
-
+    #read and set stylesheet 
     with open('file-conversion\styles.qss', 'r') as f:
         app.setStyleSheet(f.read())
-
     widget = MyApp()
     widget.resize(350, 120)
     widget.setWindowTitle('File converter')
