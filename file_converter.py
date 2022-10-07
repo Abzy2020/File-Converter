@@ -19,8 +19,8 @@ class FileConverter:
         self.API_KEY = os.environ['API_KEY']
         #class attributes
         self.convert_path = convert_path
-        self.before_convert = before_convert
-        self.after_convert = after_convert
+        self.before_convert = before_convert    #file format before conversion
+        self.after_convert = after_convert      #file format after conversion
         self.new_name = new_name
         self.new_dir = new_dir
         self.file_id = ''
@@ -79,7 +79,7 @@ class FileConverter:
         self.recieve_file(self.file_data)
 
 
-    #convert file content to base64
+    #convert file data to base64
     def convert_to_bytes(self, msg):
         msg_bytes = msg
         msg_bytes = msg_bytes.encode('ascii')
@@ -87,16 +87,17 @@ class FileConverter:
         return b64_bytes
 
 
-    #change file
+    #change current file to new file
     def recieve_file(self, file_data):
         path = rf'{self.new_dir}\{self.new_name}.{self.after_convert}'
-        #creates the file placeholder
+        #creates the blank file placeholder
         with open(path, 'wb') as file:
             data = file_data
             data = base64.b64decode(data)
             file.write(data)
         file.close()
-        #writes file data to the placeholder
+
+        #writes file data to the blank placeholder
         with open(path, 'rb') as file:
             b = file.read()
             b = base64.b64decode(b)
