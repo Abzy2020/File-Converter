@@ -1,7 +1,7 @@
 import sys
 import re
 from file_converter import FileConverter
-from PyQt6.QtWidgets import QApplication, QPushButton, QLabel, QVBoxLayout, QFileDialog, QWidget, QComboBox, QPlainTextEdit, QLineEdit
+from PyQt6.QtWidgets import QApplication, QPushButton, QLabel, QVBoxLayout, QFileDialog, QWidget, QComboBox, QLineEdit
 
 
 class MyApp(QWidget):

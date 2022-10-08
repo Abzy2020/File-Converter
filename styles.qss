@@ -1,3 +1,11 @@
-QPlainTextEdit {
-    height: 30px;
+QLineEdit {
+    border-radius: 2px;
+    border: 1px solid gray;
+    background: white;
+}
+
+QPushButton {
+    border-radius: 2px;
+    padding: 3px;
+    border: 1px solid gray;
 }
