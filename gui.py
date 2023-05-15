@@ -147,7 +147,7 @@ class MyApp(QWidget):
 if __name__ == '__main__':
     app = QApplication([])
     #read and set stylesheet 
-    with open('file-conversion\styles.qss', 'r') as f:
+    with open(r'styles.qss', 'r') as f:
         app.setStyleSheet(f.read())
     widget = MyApp()
     widget.resize(350, 120)

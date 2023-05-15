@@ -10,8 +10,8 @@ from dotenv import load_dotenv
 #loads env variables
 load_dotenv()
 
-
 class FileConverter:
+    
     def __init__(self, before_convert, after_convert, convert_path, new_dir, new_name):
         #environment variables
         self.TOKEN = os.environ['TOKEN']
@@ -96,7 +96,6 @@ class FileConverter:
             data = base64.b64decode(data)
             file.write(data)
         file.close()
-
         #writes file data to the blank placeholder
         with open(path, 'rb') as file:
             b = file.read()
@@ -116,14 +115,13 @@ class FileConverter:
         file.close()
 
 
-    #generate a token for auth
-    def create_token(self):
-        params = {
-            'Secret': self.API_SECRET,
-            'RequestCount': '999999999',
-            'Lifetime': '315569520',
-            'Count': '1'
-        }
-        response = requests.post('https://v2.convertapi.com/token/create?', params=params)
-        
-        print(response.content)
+#generate a token for auth
+def create_token():
+    params = {
+        'Secret': os.environ['API_SECRET'],
+        'RequestCount': '999999999',
+        'Lifetime': '315569520',
+        'Count': '1'
+    }
+    response = requests.post('https://v2.convertapi.com/token/create?', params=params)
+    print(response.content)
