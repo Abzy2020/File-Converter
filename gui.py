@@ -4,7 +4,7 @@ from file_converter import FileConverter
 from PyQt6.QtWidgets import QApplication, QPushButton, QLabel, QVBoxLayout, QFileDialog, QWidget, QComboBox, QLineEdit
 
 
-class MyApp(QWidget):
+class Gui(QWidget):
     def __init__(self):
         super().__init__()
 
@@ -66,7 +66,11 @@ class MyApp(QWidget):
         self.filename = QFileDialog.getOpenFileName()
         self.filepath = self.filename[0]
         #get the file extension before conversion
-        self.before_convert = re.search('[^.]+$', self.filepath).group().lower()
+        try:
+            self.before_convert = re.search('[^.]+$', self.filepath).group().lower()
+        except:
+            print('please select file')
+            return
         self.path_label.setText(f'path: {self.filepath}')
         #set conversion options based on selected file
         if self.before_convert == 'gif':
@@ -134,6 +138,9 @@ class MyApp(QWidget):
 
 
     def make_conversion(self):
+        if not self.filepath or not self.dirpath or not self.after_convert or not self.before_convert or not self.rename.text():
+            print('please select file and conversion path')
+            return
         converter = FileConverter(                    
                     before_convert=self.before_convert,
                     after_convert=self.after_convert,
@@ -149,7 +156,7 @@ if __name__ == '__main__':
     #read and set stylesheet 
     with open(r'styles.qss', 'r') as f:
         app.setStyleSheet(f.read())
-    widget = MyApp()
+    widget = Gui()
     widget.resize(350, 120)
     widget.setWindowTitle('File converter')
     widget.show()
