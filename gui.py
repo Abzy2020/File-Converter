@@ -5,6 +5,7 @@ from PyQt6.QtWidgets import QApplication, QPushButton, QLabel, QVBoxLayout, QFil
 
 
 class Gui(QWidget):
+
     def __init__(self):
         super().__init__()
 
@@ -18,16 +19,16 @@ class Gui(QWidget):
         self.convert_button = QPushButton('convert')
             #dropdown box
         self.dropdown = QComboBox(self)
-        self.gif_to_other = ['png', 'jpg', 'gif', 'pdf', 'pdfa', 'svg', 'tiff', 'webp']
         self.jpg_to_other = ['compress', 'gif', 'jpg', 'pdf', 'pdfa', 'png', 'svg', 'tiff', 'watermark', 'webp']
         self.png_to_other = ['gif', 'jpg', 'pdf', 'pdfa', 'png', 'svg', 'tiff', 'watermark', 'webp']
-        self.svg_to_other = ['jpg', 'pdf', 'pdfa', 'png', 'svg', 'tiff', 'webp']
         self.csv_to_other = ['jpg', 'pdf', 'pdfa', 'png', 'tiff', 'webp', 'xls', 'xlsx']
+        self.gif_to_other = ['png', 'jpg', 'gif', 'pdf', 'pdfa', 'svg', 'tiff', 'webp']
+        self.svg_to_other = ['jpg', 'pdf', 'pdfa', 'png', 'svg', 'tiff', 'webp']
+        self.pdf_to_other = ['csv', 'ocr', 'txt']
         self.docx_to_other = [
             'compare', 'doc', 'docx', 'encrypt', 'html', 'jpg', 'mhtml', 'odt', 'pdf', 'png', 
             'rtf', 'tiff', 'txt', 'webp', 'xml', 'xps'
         ]
-        self.pdf_to_other = ['csv', 'ocr', 'txt']
 
         self.dropdown.activated.connect(self.select_conversion_handler)
             #rename file text edit
@@ -118,7 +119,6 @@ class Gui(QWidget):
             self.selection = self.docx_to_other[index]
         else:
             print('please select file')
-
         print(f'Activated index: {self.selection}')
         self.convert_confirmation(self.selection)
 
