@@ -3,6 +3,7 @@ import json
 import requests
 import base64
 import io
+from cryptography.fernet import Fernet
 from PIL import Image
 from dotenv import load_dotenv
 
@@ -17,7 +18,9 @@ class FileConverter:
         self.TOKEN = os.environ['TOKEN']
         self.API_SECRET = os.environ['API_SECRET']
         self.API_KEY = os.environ['API_KEY']
+        self.CIPHER = os.environ['CIPHER']
         #class attributes
+        self.encrypt = False
         self.convert_path = convert_path
         self.before_convert = before_convert    #file format before conversion
         self.after_convert = after_convert      #file format after conversion
@@ -42,31 +45,21 @@ class FileConverter:
         #get file data in binaray and post request
         with open(f"{self.convert_path}", "rb") as file:
             b = file.read()
-        b = b
-        post_files = {
-            "filename": b,
-            }
-        headers = {
-            'Content-Disposition': 'form-data',
-        }
+        post_files = {"filename": b,}
+        headers = {'Content-Disposition': 'form-data',}
         payload = ''
         url = f"https://v2.convertapi.com/upload?Secret={self.API_SECRET}&FileName={self.convert_path}"
         session = requests.Session()
         response = session.request('POST', url, data=payload, files=post_files, headers=headers)
         response = json.loads(response.text)
         print(response)
-        self.set_file_attributes(
-            response['FileId'],
-            self.new_name,
-            response['FileExt'],
-            response['Url'])
+        self.set_file_attributes(response['FileId'],self.new_name,
+            response['FileExt'], response['Url'])
 
 
     #convert uploaded file
     def convert_file(self):
-        headers = {
-            "Accept": "*/*",
-        }
+        headers = {"Accept": "*/*",}
         payload = ''
         url = f'https://v2.convertapi.com/convert/{self.before_convert}/to/{self.after_convert}?Secret={self.API_SECRET}&File={self.file_id}'
         session = requests.Session()
@@ -87,7 +80,25 @@ class FileConverter:
         return b64_bytes
 
 
-    #change current file to new file
+    def save_file(self, file_data, path):
+        data = file_data
+        f = Fernet(self.CIPHER)
+        if self.encrypt == True:
+            data = f.encrypt(data)
+        try:
+            img = Image.open(io.BytesIO(data))
+            img.show()
+            img.save(path)
+        #if file is document
+        except:
+            with open(path, 'wb') as file:
+                file.write(data)
+                file.close()
+                os.startfile(path)
+        os.startfile(path)
+        #change current file to new file
+
+
     def recieve_file(self, file_data):
         path = rf'{self.new_dir}\{self.new_name}.{self.after_convert}'
         #creates the blank file placeholder
@@ -100,19 +111,12 @@ class FileConverter:
         with open(path, 'rb') as file:
             b = file.read()
             b = base64.b64decode(b)
-            #if file is image
-            try:
-                img = Image.open(io.BytesIO(b))
-                img.show()
-                img.save(path)
-            #if file is document
-            except:
-                file.close()
-                with open(path, 'wb') as file:
-                    file.write(b)
-                    file.close()
-                    os.startfile(path)
+            self.save_file(b, path)
         file.close()
+
+
+    def toggle_encrypt(self, value):
+        self.encrypt = value
 
 
 #generate a token for auth
@@ -125,3 +129,9 @@ def create_token():
     }
     response = requests.post('https://v2.convertapi.com/token/create?', params=params)
     print(response.content)
+
+
+def generate_cipher():
+    key = Fernet.generate_key()
+    print(key)
+

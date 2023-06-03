@@ -1,24 +1,44 @@
 import sys
 import re
 from file_converter import FileConverter
-from PyQt6.QtWidgets import QApplication, QPushButton, QLabel, QVBoxLayout, QFileDialog, QWidget, QComboBox, QLineEdit
-
+from PyQt6.QtWidgets import QApplication, QPushButton, QTabWidget , QCheckBox, QLabel, QGridLayout, QFileDialog, QWidget, QComboBox, QLineEdit, QSpacerItem, QSizePolicy
+from PyQt6.QtCore import Qt
 
 class Gui(QWidget):
 
     def __init__(self):
         super().__init__()
-
         self.filepath = 'path: '
         self.dirstring = 'conversion path: '
         self.before_convert = ''
-
         #Widgets
+        self.tab_widget = QTabWidget()
+        self.tab_1 = QWidget()
+        self.tab_2 = QWidget()
+
+        #Layouts
+        self.tab_widget.addTab(self.tab_1, 'file conversion')
+        self.tab_widget.addTab(self.tab_2, 'file encryption')
+        self.conversion_tab()
+        self.encryption_tab()
+        self.main_layout = QGridLayout(self)
+        self.main_layout.addWidget(self.tab_widget)
+        
+        #Signals
+        self.search_button.clicked.connect(self.search_files_handler)
+        self.dir_button.clicked.connect(self.search_dir_handler)
+        self.convert_button.clicked.connect(self.make_conversion)
+        self.encrypt_dropdown.activated.connect(self.encryption_handler)
+        self.search_button_e.clicked.connect(self.search_encryption_handler)
+
+    def conversion_tab(self):
         self.search_button = QPushButton('search file')
         self.dir_button = QPushButton('select directory')
         self.convert_button = QPushButton('convert')
-            #dropdown box
+        self.encrypt_button = QCheckBox('encrypt?')
+        #dropdown box
         self.dropdown = QComboBox(self)
+        self.dropdown.activated.connect(self.select_conversion_handler)
         self.jpg_to_other = ['compress', 'gif', 'jpg', 'pdf', 'pdfa', 'png', 'svg', 'tiff', 'watermark', 'webp']
         self.png_to_other = ['gif', 'jpg', 'pdf', 'pdfa', 'png', 'svg', 'tiff', 'watermark', 'webp']
         self.csv_to_other = ['jpg', 'pdf', 'pdfa', 'png', 'tiff', 'webp', 'xls', 'xlsx']
@@ -29,19 +49,16 @@ class Gui(QWidget):
             'compare', 'doc', 'docx', 'encrypt', 'html', 'jpg', 'mhtml', 'odt', 'pdf', 'png', 
             'rtf', 'tiff', 'txt', 'webp', 'xml', 'xps'
         ]
-
-        self.dropdown.activated.connect(self.select_conversion_handler)
-            #rename file text edit
+        #rename file text edit
         self.rename = QLineEdit(self)
-            #labels
+        #labels
         self.label = QLabel('select desired format', self)
-        self.path_label = QLabel(self.filepath, self)
+        self.path_label_c = QLabel(self.filepath, self)
         self.dirpath_label = QLabel(self.dirstring, self)
-        self.rename_label = QLabel('name new file')
-
-        #Layouts
-        self.my_layout = QVBoxLayout(self)
-        self.my_layout.addWidget(self.path_label)
+        self.rename_label = QLabel('name new file:')
+        #layout
+        self.my_layout = QGridLayout(self)
+        self.my_layout.addWidget(self.path_label_c)
         self.my_layout.addWidget(self.search_button)
         self.my_layout.addWidget(self.dirpath_label)
         self.my_layout.addWidget(self.dir_button)
@@ -49,17 +66,55 @@ class Gui(QWidget):
         self.my_layout.addWidget(self.dropdown)
         self.my_layout.addWidget(self.rename_label)
         self.my_layout.addWidget(self.rename)
+        self.my_layout.addWidget(self.encrypt_button) 
         self.my_layout.addWidget(self.convert_button)
+        self.tab_1.setLayout(self.my_layout)
 
-        #Signals
-        self.search_button.clicked.connect(self.search_files_handler)
-        self.dir_button.clicked.connect(self.search_dir_handler)
-        self.convert_button.clicked.connect(self.make_conversion)
+
+    def encryption_tab(self):
+        self.path_label_e = QLabel(self.filepath, self)
+        self.path_label_e.setObjectName('path_label_e')
+        self.search_button_e = QPushButton('search file')
+        self.encrypt_dropdown = QComboBox(self)
+        self.activate_button_e = QPushButton('encrypt file')
+        self.my_layout2 = QGridLayout(self)
+        vspacer = QSpacerItem(1, 1)
+        self.encrypt_dropdown.addItems(['encrypt', 'decrypt'])
+        self.my_layout2.addWidget(self.encrypt_dropdown)
+        self.my_layout2.addWidget(self.path_label_e)
+        self.my_layout2.addWidget(self.search_button_e)
+        self.my_layout2.addWidget(self.activate_button_e)
+        self.my_layout2.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.tab_2.setLayout(self.my_layout2)
+
+
+    def encryption_handler(self):
+        if self.encrypt_dropdown.currentText() == 'encrypt':
+            self.activate_button_e.setText('encrypt file')
+        else:
+            self.activate_button_e.setText('decrypt file')
+
+
+    def search_encryption_handler(self):
+        filename = QFileDialog.getOpenFileName()
+        filepath = filename[0]
+        self.path_label_e.setText(f'path: {filepath}')
 
 
     def search_files_handler(self):
         print('searching files')
         self.search_files()
+    
+
+    def clear_choices(self):
+        self.dropdown.clear()
+        self.dropdown.addItem('select desired format')
+        self.rename.clear()
+        self.filepath = 'path: '
+        self.dirpath = 'conversion path: '
+        self.before_convert = ''
+        self.after_convert = ''
+        self.encrypt_button.setChecked(False)
 
 
     def search_files(self):
@@ -147,6 +202,8 @@ class Gui(QWidget):
                     convert_path=self.filepath,
                     new_name=self.rename.text(),
                     new_dir=self.dirpath)
+        self.encrypt = True if self.encrypt_button.isChecked() else False
+        converter.toggle_encrypt(self.encrypt)
         converter.upload_file()
         converter.convert_file()
 
@@ -158,7 +215,7 @@ if __name__ == '__main__':
         app.setStyleSheet(f.read())
     widget = Gui()
     widget.resize(350, 120)
-    widget.setWindowTitle('File converter')
+    widget.setFixedSize(350, 310)
+    widget.setWindowTitle('File Manager')
     widget.show()
-
     sys.exit(app.exec())
