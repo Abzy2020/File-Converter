@@ -1,21 +1,33 @@
 import sys
 import re
-from file_converter import FileConverter
-from PyQt6.QtWidgets import QApplication, QPushButton, QTabWidget , QCheckBox, QLabel, QGridLayout, QFileDialog, QWidget, QComboBox, QLineEdit, QSpacerItem, QSizePolicy
+from PyQt6.QtWidgets import (QApplication, QPushButton, QTabWidget , QCheckBox, QLabel, 
+                            QGridLayout,QFileDialog, QWidget, QComboBox, QLineEdit)
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QPixmap
+
+from file_converter import FileConverter
+from file_encryptor import FileEncryptor
+
 
 class Gui(QWidget):
 
     def __init__(self):
         super().__init__()
         self.filepath = 'path: '
+        self.e_filepath = ''
         self.dirstring = 'conversion path: '
         self.before_convert = ''
+        #Settings
+        self.setWindowTitle('File Manager')
+        self.resize(350, 120)
+        self.setFixedSize(350, 310)
+        self.setObjectName('main_window')
         #Widgets
         self.tab_widget = QTabWidget()
         self.tab_1 = QWidget()
         self.tab_2 = QWidget()
-
+        self.tab_1.setObjectName('tab_1')
+        self.tab_2.setObjectName('tab_2')
         #Layouts
         self.tab_widget.addTab(self.tab_1, 'file conversion')
         self.tab_widget.addTab(self.tab_2, 'file encryption')
@@ -23,13 +35,14 @@ class Gui(QWidget):
         self.encryption_tab()
         self.main_layout = QGridLayout(self)
         self.main_layout.addWidget(self.tab_widget)
-        
         #Signals
         self.search_button.clicked.connect(self.search_files_handler)
         self.dir_button.clicked.connect(self.search_dir_handler)
         self.convert_button.clicked.connect(self.make_conversion)
         self.encrypt_dropdown.activated.connect(self.encryption_handler)
         self.search_button_e.clicked.connect(self.search_encryption_handler)
+        self.activate_button_e.clicked.connect(self.en_or_de)
+
 
     def conversion_tab(self):
         self.search_button = QPushButton('search file')
@@ -73,15 +86,19 @@ class Gui(QWidget):
 
     def encryption_tab(self):
         self.path_label_e = QLabel(self.filepath, self)
+        self.img_label = QLabel(self)
         self.path_label_e.setObjectName('path_label_e')
         self.search_button_e = QPushButton('search file')
         self.encrypt_dropdown = QComboBox(self)
         self.activate_button_e = QPushButton('encrypt file')
         self.my_layout2 = QGridLayout(self)
-        vspacer = QSpacerItem(1, 1)
+        if self.e_filepath:
+            self.pixmap = QPixmap(self.e_filepath)
+            self.img_label.setPixmap(self.pixmap)
         self.encrypt_dropdown.addItems(['encrypt', 'decrypt'])
         self.my_layout2.addWidget(self.encrypt_dropdown)
         self.my_layout2.addWidget(self.path_label_e)
+        self.my_layout2.addWidget(self.img_label)
         self.my_layout2.addWidget(self.search_button_e)
         self.my_layout2.addWidget(self.activate_button_e)
         self.my_layout2.setAlignment(Qt.AlignmentFlag.AlignTop)
@@ -96,9 +113,21 @@ class Gui(QWidget):
 
 
     def search_encryption_handler(self):
-        filename = QFileDialog.getOpenFileName()
-        filepath = filename[0]
-        self.path_label_e.setText(f'path: {filepath}')
+        self.e_filepath = QFileDialog.getOpenFileName()
+        self.e_filepath = self.e_filepath[0]
+        self.path_label_e.setText(f'path: {self.e_filepath}')
+        self.pixmap = QPixmap(self.e_filepath)
+        self.img_label.setPixmap(self.pixmap)
+        self.pixmap.scaledToHeight(100)
+
+    
+    def en_or_de(self):
+        file_translator = FileEncryptor(self.e_filepath)
+        if self.encrypt_dropdown.currentText() == 'encrypt':
+            file_translator.encrypt_file()
+        else:
+            self.activate_button_e.setText('decrypt file')
+            file_translator.decrypt_file()
 
 
     def search_files_handler(self):
@@ -214,8 +243,5 @@ if __name__ == '__main__':
     with open(r'styles.qss', 'r') as f:
         app.setStyleSheet(f.read())
     widget = Gui()
-    widget.resize(350, 120)
-    widget.setFixedSize(350, 310)
-    widget.setWindowTitle('File Manager')
     widget.show()
     sys.exit(app.exec())

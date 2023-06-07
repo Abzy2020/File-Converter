@@ -7,4 +7,21 @@ QPushButton {
     border-radius: 2px;
     padding: 3px;
     border: 1px solid gray;
+    background: #FF5733;
+    border: none;
+}
+#tab_1, #tab_2 {
+    background: #b90f4f;
+}
+QTabWidget:pane {
+    border: 1px solid #b90f4f;
+}
+QTabBar::tab {
+    background: #900C3F;
+}
+QTabBar::tab:selected {
+    background: #b90f4f;
+}
+#main_window {
+    background: #4c2253;
 }

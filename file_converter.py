@@ -119,19 +119,14 @@ class FileConverter:
         self.encrypt = value
 
 
-#generate a token for auth
-def create_token():
-    params = {
-        'Secret': os.environ['API_SECRET'],
-        'RequestCount': '999999999',
-        'Lifetime': '315569520',
-        'Count': '1'
-    }
-    response = requests.post('https://v2.convertapi.com/token/create?', params=params)
-    print(response.content)
-
-
-def generate_cipher():
-    key = Fernet.generate_key()
-    print(key)
+    #generate a token for auth
+    def create_token():
+        params = {
+            'Secret': os.environ['API_SECRET'],
+            'RequestCount': '999999999',
+            'Lifetime': '315569520',
+            'Count': '1'
+        }
+        response = requests.post('https://v2.convertapi.com/token/create?', params=params)
+        print(response.content)
 
